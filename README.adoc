@@ -70,7 +70,7 @@ On final exam day, we'll all demo our programs that we wrote.
 * https://www.atlassian.com/git/[Getting Git Right]
 * http://pcottle.github.io/learnGitBranching/?demo[Learn Git Branching]
 * http://rypress.com/tutorials/git/index[Ry's Git Tutorial]
-* http://think-like-a-git.net/[Think like (a) Git</li>
+* http://think-like-a-git.net/[Think like (a) Git]
 * https://try.github.com/[Try Git]
 
 === References
