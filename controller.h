@@ -1,8 +1,9 @@
-#include "model.h"
-#include "view.h"
-
 #ifndef _CONTROLLER_H
 #define _CONTROLLER_H
+
+#include "model.h"
+#include "view.h"
+#include "level.h"
 
 // Handle input
 class Controller {
