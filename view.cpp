@@ -34,14 +34,10 @@ View::View(string title, int width, int height) {
         return;
     }
     // Load assets
-//    snake = load("assets/snake.png");
-//    music = Mix_LoadMUS("assets/2Inventions_-_Johaness_Gilther_-_Don_t_leave_me.mp3");
-//    if (music != NULL) {
-//       Mix_PlayMusic( music, -1 );
-//    }
-//    food = Mix_LoadWAV("assets/yummy.wav");
-    font = TTF_OpenFont( "assets/LiberationSans-Regular.ttf", 28 );
-
+    font = TTF_OpenFont("assets/LiberationSans-Regular.ttf", 28);
+    brickTexture = load("assets/brick.png");
+    ballTexture = load("assets/ball.png");
+    paddleTexture = load("assets/paddle.png");
 }
 
 View::~View() {
@@ -70,11 +66,11 @@ SDL_Surface* View::load(char * path) {
 }
 
 void View::show(Model * model) {
+    SDL_FillRect(screen, NULL, SDL_MapRGB(screen->format, 0x00, 0x00, 0x00));
 
-    SDL_FillRect(screen, NULL, SDL_MapRGB(screen->format,
-        0x00, 0x00, 0x00));
-
-    // Probably call SDL_FillRect or SDL_BlitSurface a bunch here :-)
+    for(int i = 0; i < model->getCurrentLevel()->getBricks().size(); i++) {
+        SDL_BlitScaled(brickTexture, NULL, screen, &model->getCurrentLevel()->getBricks()[i].bounds);
+    }
 
     SDL_UpdateWindowSurface(window);
 }

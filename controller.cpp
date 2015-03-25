@@ -1,53 +1,51 @@
 #include "controller.h"
 #include <map>
+#include <iostream>
 
 using namespace std;
 
 Controller::Controller() {
-    model = new Model();
     view = new View("Game", 1024, 768);
+    model = new Model(1024, 768);
 }
 
 Controller::~Controller() {
     delete model;
     delete view;
 }
-/**
-References:
-https://wiki.libsdl.org/SDL_PollEvent
-https://wiki.libsdl.org/SDL_Event
-*/
+
 void Controller::loop() {
     SDL_Event e;
     unsigned int lastTime = 0, currentTime;
+    unsigned int frameDelay = 1000 / 60;
     std::map<SDL_Keycode, Direction> direction;
-    direction[SDLK_UP] = UP;
-    direction[SDLK_DOWN] = DOWN;
     direction[SDLK_LEFT] = LEFT;
     direction[SDLK_RIGHT] = RIGHT;
 
     while(!model->gameOver()) {
         currentTime = SDL_GetTicks();
         // Do stuff here to animate as necessary
-        view->show(model);
-        if (SDL_PollEvent(&e) != 0) {
-            switch (e.type) {
-            case SDL_QUIT:
-                return;
-            case SDL_KEYDOWN:
-                switch(e.key.keysym.sym) {
-                case SDLK_DOWN:
-                case SDLK_UP:
-                case SDLK_LEFT:
-                case SDLK_RIGHT:
-//                    model->go(direction[e.key.keysym.sym]);
-                break;
-                default:
-                break;
+        if(currentTime > lastTime + frameDelay) {
+            while(SDL_PollEvent(&e)) {
+                switch (e.type) {
+                case SDL_QUIT:
+                    return;
+                case SDL_KEYDOWN:
+                    switch(e.key.keysym.sym) {
+                    case SDLK_LEFT:
+                    case SDLK_RIGHT:
+                        model->getCurrentLevel()->movePaddle(direction[e.key.keysym.sym]);
+                        break;
+                    default:
+                        break;
+                    }
+                case SDL_MOUSEBUTTONDOWN:
+                    break;
                 }
-            case SDL_MOUSEBUTTONDOWN:
-                break;
             }
+            model->update();
+            view->show(model);
+            lastTime = currentTime;
         }
     }
     // TODO: show something nice?

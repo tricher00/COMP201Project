@@ -1,3 +1,5 @@
+#ifndef _VIEW_H
+#define _VIEW_H
 
 #define SDL_MAIN_HANDLED
 #include <SDL2/SDL.h>
@@ -7,9 +9,6 @@
 #include "model.h"
 #include <map>
 #include <string>
-
-#ifndef _VIEW_H
-#define _VIEW_H
 
 // Show (output) the state of the model
 class View {
@@ -23,9 +22,9 @@ private:
     SDL_Surface* screen;
     bool fail;
     SDL_Surface* load(char * path);
-//    SDL_Surface* text;
-//    Mix_Music * music;
-//    Mix_Chunk * food;
-    TTF_Font * font;
+    TTF_Font* font;
+    SDL_Surface* brickTexture;
+    SDL_Surface* ballTexture;
+    SDL_Surface* paddleTexture;
 };
 #endif
