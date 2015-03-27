@@ -31,6 +31,10 @@ void Ball::setPosition(int x, int y) {
     bounds.y = y;
 }
 
+void Ball::setStuck(bool s) {
+    stuck = s;
+}
+
 bool Ball::isStuck() {
     return stuck;
 }

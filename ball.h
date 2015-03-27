@@ -11,6 +11,7 @@ public:
     void reverseY();
     void reverseX();
     void setPosition(int x, int y);
+    void setStuck(bool s);
     bool isStuck();
     SDL_Rect getBounds();
 private:
@@ -18,8 +19,8 @@ private:
     int speed = 5;
     int xVel = 0;
     int yVel = 0;
-    bool shouldStick;
-    bool stuck;
+    bool shouldStick = false;
+    bool stuck = true;
 };
 
 #endif

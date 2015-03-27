@@ -24,15 +24,18 @@ public:
     void update();
     void checkCollisions();
     void load(std::string path, int screenWidth, int screenHeight);
-    void movePaddle(Direction dir);
+    void movePaddle(Direction dir, bool down);
     bool isOver();
     SDL_Rect getPaddleBounds();
+    SDL_Rect getBallBounds();
     std::vector<Brick> getBricks();
 private:
-    static const int BASE_PADDLE_SPEED = 7;
+    static const int BASE_PADDLE_SPEED = 10;
     Ball *ball;
     SDL_Rect paddleBounds;
+    SDL_Rect screenBounds;
     std::vector<Brick> bricks;
+    bool moveLeft = false, moveRight = false;
 };
 
 #endif

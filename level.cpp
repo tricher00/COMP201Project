@@ -4,11 +4,15 @@
 
 Level::Level(std::string path, int screenWidth, int screenHeight) {
     load(path, screenWidth, screenHeight);
-    paddleBounds.x = screenWidth / 2;
-    paddleBounds.y = screenHeight - 10;
     paddleBounds.w = screenWidth / 12;
     paddleBounds.h = screenHeight / 16;
-    ball = new Ball(paddleBounds.x + (paddleBounds.w / 2), paddleBounds.y + 5, 5, 5);
+    paddleBounds.x = screenWidth / 2 - paddleBounds.w / 2;
+    paddleBounds.y = screenHeight - 10;
+    screenBounds.x = 0;
+    screenBounds.y = 0;
+    screenBounds.w = screenWidth;
+    screenBounds.h = screenHeight;
+    ball = new Ball(paddleBounds.x + (paddleBounds.w / 2), paddleBounds.y - 64, 64, 64);
 }
 
 Level::~Level() {
@@ -18,17 +22,27 @@ Level::~Level() {
 void Level::update() {
     if(!ball->isStuck()) {
         ball->step();
+        checkCollisions();
     } else {
-        ball->setPosition(paddleBounds.x + (paddleBounds.w / 2) - (ball->getBounds().w / 2), paddleBounds.y + ball->getBounds().h);
+        ball->setPosition(paddleBounds.x + (paddleBounds.w / 2) - (ball->getBounds().w / 2), ball->getBounds().y);
+    }
+
+    if(moveLeft) {
+        paddleBounds.x -= BASE_PADDLE_SPEED;
+    }
+
+    if(moveRight) {
+        paddleBounds.x += BASE_PADDLE_SPEED;
     }
 }
 
 void Level::checkCollisions() {
     bool collided = false;
-    SDL_Rect *intersect;
+    SDL_Rect* intersect = new SDL_Rect();
     SDL_Rect ballBounds = ball->getBounds();
     for(int i = 0; i < bricks.size(); i++) {
-        if(SDL_IntersectRect(&ballBounds, &bricks[i].bounds, intersect)) {
+        if(!bricks[i].broken && SDL_IntersectRect(&ballBounds, &bricks[i].bounds, intersect)) {
+            bricks[i].broken = true;
             collided = true;
             break;
         }
@@ -48,6 +62,14 @@ void Level::checkCollisions() {
             ball->reverseX();
         }
     }
+
+    if(ballBounds.x <= 0 || ballBounds.x + ballBounds.w <= screenBounds.w) {
+        ball->reverseX();
+    } else if(ballBounds.y <= 0) {
+        ball->reverseY();
+    } else if(ballBounds.y >= screenBounds.h) {
+        // Add a death
+    }
 }
 
 void Level::load(std::string path, int screenWidth, int screenHeight) {
@@ -65,9 +87,9 @@ void Level::load(std::string path, int screenWidth, int screenHeight) {
                 Brick brick;
                 SDL_Rect bounds;
                 bounds.x = x * (screenWidth / loadedSurface->w);
-                bounds.y = y * (screenWidth / 24);
+                bounds.y = y * ((screenHeight - screenHeight / 4) / loadedSurface->h);
                 bounds.w = screenWidth / loadedSurface->w;
-                bounds.h = screenHeight / 24;
+                bounds.h = (screenHeight - screenHeight / 4) / loadedSurface->h;
                 brick.bounds = bounds;
                 SDL_Color color;
                 color.r = r;
@@ -82,8 +104,14 @@ void Level::load(std::string path, int screenWidth, int screenHeight) {
     SDL_FreeSurface(loadedSurface);
 }
 
-void Level::movePaddle(Direction dir) {
-    dir == LEFT ? paddleBounds.x -= BASE_PADDLE_SPEED : paddleBounds.x += BASE_PADDLE_SPEED;
+void Level::movePaddle(Direction dir, bool down) {
+    if(dir == LEFT) {
+        moveLeft = down;
+        std::cout << "moveLeft = " << down << std::endl;
+    } else {
+        moveRight = down;
+        std::cout << "moveRight = " << down << std::endl;
+    }
 }
 
 bool Level::isOver() {
@@ -93,6 +121,10 @@ bool Level::isOver() {
         }
     }
     return true;
+}
+
+SDL_Rect Level::getBallBounds() {
+    return ball->getBounds();
 }
 
 SDL_Rect Level::getPaddleBounds() {
