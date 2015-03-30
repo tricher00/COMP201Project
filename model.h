@@ -18,6 +18,8 @@ public:
     Level* getCurrentLevel();
 private:
     int currentLevel = 0;
+    int lives = 3;
+    int score = 0;
     std::vector<Level*> levels;
 };
 

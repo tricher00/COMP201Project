@@ -1,6 +1,5 @@
 #include "controller.h"
 #include <map>
-#include <iostream>
 
 using namespace std;
 
@@ -34,11 +33,22 @@ void Controller::loop() {
                     switch(e.key.keysym.sym) {
                     case SDLK_LEFT:
                     case SDLK_RIGHT:
-                        model->getCurrentLevel()->movePaddle(direction[e.key.keysym.sym]);
+                        model->getCurrentLevel()->movePaddle(direction[e.key.keysym.sym], true);
                         break;
                     default:
                         break;
                     }
+                    break;
+                case SDL_KEYUP:
+                    switch(e.key.keysym.sym) {
+                    case SDLK_LEFT:
+                    case SDLK_RIGHT:
+                        model->getCurrentLevel()->movePaddle(direction[e.key.keysym.sym], false);
+                        break;
+                    default:
+                        break;
+                    }
+                    break;
                 case SDL_MOUSEBUTTONDOWN:
                     break;
                 }

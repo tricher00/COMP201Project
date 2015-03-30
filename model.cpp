@@ -12,7 +12,7 @@ Model::~Model() {
 }
 
 bool Model::gameOver() {
-    return currentLevel == levels.size() - 1 && getCurrentLevel()->isOver();
+    return currentLevel == levels.size() - 1 && getCurrentLevel()->isOver() && lives == 0;
 }
 
 void Model::update() {
