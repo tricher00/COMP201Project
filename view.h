@@ -19,12 +19,17 @@ public:
     void show(Model * model);
 private:
     SDL_Window* window;
+    SDL_Renderer* renderer;
     SDL_Surface* screen;
     bool fail;
-    SDL_Surface* load(char * path);
+    SDL_Texture* load(char * path);
     TTF_Font* font;
-    SDL_Surface* brickTexture;
-    SDL_Surface* ballTexture;
-    SDL_Surface* paddleTexture;
+    SDL_Texture* levelTextures;
+    SDL_Texture* brickTextures;
+    SDL_Texture* bgTexture;
+    SDL_Texture* bubbleTexture;
+    SDL_Rect paddleUV = { 0, 0, 256, 45 };
+    SDL_Rect brickUV = { 0, 0, 128, 128 };
+    SDL_Rect ballUV = { 0, 45, 32, 32 };
 };
 #endif

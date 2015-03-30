@@ -35,6 +35,9 @@ void Controller::loop() {
                     case SDLK_RIGHT:
                         model->getCurrentLevel()->movePaddle(direction[e.key.keysym.sym], true);
                         break;
+                    case SDLK_SPACE:
+                        model->getCurrentLevel()->releaseBall();
+                        break;
                     default:
                         break;
                     }

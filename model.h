@@ -16,6 +16,8 @@ public:
     void update();
     void addLevel(Level *level);
     Level* getCurrentLevel();
+    void decrementLives();
+    int getLives();
 private:
     int currentLevel = 0;
     int lives = 3;

@@ -1,5 +1,4 @@
 #include "level.h"
-#include "ball.h"
 #include <iostream>
 
 Level::Level(std::string path, int screenWidth, int screenHeight) {
@@ -12,63 +11,100 @@ Level::Level(std::string path, int screenWidth, int screenHeight) {
     screenBounds.y = 0;
     screenBounds.w = screenWidth;
     screenBounds.h = screenHeight;
-    ball = new Ball(paddleBounds.x + (paddleBounds.w / 2), paddleBounds.y - 64, 64, 64);
+    balls.push_back(new Ball(paddleBounds.x + (paddleBounds.w / 2), paddleBounds.y - 16, 16, 16));
 }
 
 Level::~Level() {
-    delete ball;
+    for(int i = 0; i < balls.size(); i++) {
+        delete balls[i];
+    }
 }
 
 void Level::update() {
-    if(!ball->isStuck()) {
-        ball->step();
-        checkCollisions();
-    } else {
-        ball->setPosition(paddleBounds.x + (paddleBounds.w / 2) - (ball->getBounds().w / 2), ball->getBounds().y);
+    for(int i = 0; i < balls.size(); i++) {
+        if(balls[i]->isStuck()) {
+            balls[i]->setPosition(paddleBounds.x + (paddleBounds.w / 2) - (balls[i]->getBounds().w / 2), balls[i]->getBounds().y);
+        } else {
+            balls[i]->step();
+            checkCollisions();
+        }
     }
 
     if(moveLeft) {
-        paddleBounds.x -= BASE_PADDLE_SPEED;
+        if(paddleBounds.x - BASE_PADDLE_SPEED >= 0) {
+            paddleBounds.x -= BASE_PADDLE_SPEED;
+        } else {
+            paddleBounds.x = 0;
+        }
     }
 
     if(moveRight) {
-        paddleBounds.x += BASE_PADDLE_SPEED;
+        if(paddleBounds.x + paddleBounds.w + BASE_PADDLE_SPEED <= screenBounds.w) {
+            paddleBounds.x += BASE_PADDLE_SPEED;
+        } else {
+            paddleBounds.x = screenBounds.w - paddleBounds.w;
+        }
     }
 }
 
 void Level::checkCollisions() {
     bool collided = false;
     SDL_Rect* intersect = new SDL_Rect();
-    SDL_Rect ballBounds = ball->getBounds();
-    for(int i = 0; i < bricks.size(); i++) {
-        if(!bricks[i].broken && SDL_IntersectRect(&ballBounds, &bricks[i].bounds, intersect)) {
-            bricks[i].broken = true;
+    for(int i = 0; i < balls.size(); i++) {
+        Ball* ball = balls[i];
+        SDL_Rect ballBounds = ball->getBounds();
+        for(int i = 0; i < bricks.size(); i++) {
+            if(!bricks[i].broken && SDL_IntersectRect(&ballBounds, &bricks[i].bounds, intersect)) {
+                if(intersect->w > intersect->h) {
+                    // If its coming from below
+                    if(ballBounds.y - ball->getYVel() > bricks[i].bounds.y + bricks[i].bounds.h) {
+                        ballBounds.y = bricks[i].bounds.y + bricks[i].bounds.h;
+                    } else {
+                        ballBounds.y = bricks[i].bounds.y - ballBounds.h;
+                    }
+                    ball->reverseY();
+                } else if(intersect->w < intersect->h) {
+                    // If its coming from the left
+                    if(ballBounds.x - ball->getXVel() > bricks[i].bounds.x + bricks[i].bounds.w) {
+                        ballBounds.x = bricks[i].bounds.x + bricks[i].bounds.w;
+                    } else {
+                        ballBounds.x = bricks[i].bounds.x - ballBounds.w;
+                    }
+                    ball->reverseX();
+                } else {
+                    ball->reverseY();
+                    ball->reverseX();
+                }
+                bricks[i].broken = true;
+                collided = true;
+                break;
+            }
+        }
+
+        if(!collided && SDL_IntersectRect(&ballBounds, &paddleBounds, intersect)) {
             collided = true;
-            break;
+            if(ball->shouldStick()) {
+                ball->setStuck(true);
+            }
+            if(intersect->w > intersect->h) {
+                ball->reverseY();
+            } else if(intersect->w < intersect->h) {
+                ball->reverseX();
+            } else {
+                ball->reverseY();
+                ball->reverseX();
+            }
         }
-    }
 
-    if(!collided && SDL_IntersectRect(&ballBounds, &paddleBounds, intersect)) {
-        collided = true;
-    }
-
-    if(collided) {
-        if(intersect->w > intersect->h) {
-            ball->reverseY();
-        } else if(intersect->w < intersect->h) {
+        if(ballBounds.x <= 0 || ballBounds.x + ballBounds.w >= screenBounds.w) {
             ball->reverseX();
-        } else {
+        } else if(ballBounds.y <= 0) {
             ball->reverseY();
-            ball->reverseX();
+        } else if(ballBounds.y >= screenBounds.h) {
+            delete ball;
+            ball = new Ball(paddleBounds.x + (paddleBounds.w / 2), paddleBounds.y - 16, 16, 16);
+        
         }
-    }
-
-    if(ballBounds.x <= 0 || ballBounds.x + ballBounds.w <= screenBounds.w) {
-        ball->reverseX();
-    } else if(ballBounds.y <= 0) {
-        ball->reverseY();
-    } else if(ballBounds.y >= screenBounds.h) {
-        // Add a death
     }
 }
 
@@ -107,10 +143,14 @@ void Level::load(std::string path, int screenWidth, int screenHeight) {
 void Level::movePaddle(Direction dir, bool down) {
     if(dir == LEFT) {
         moveLeft = down;
-        std::cout << "moveLeft = " << down << std::endl;
     } else {
         moveRight = down;
-        std::cout << "moveRight = " << down << std::endl;
+    }
+}
+
+void Level::releaseBall() {
+    for(int i = 0; i < balls.size(); i++) {
+        balls[i]->setStuck(false);
     }
 }
 
@@ -123,8 +163,8 @@ bool Level::isOver() {
     return true;
 }
 
-SDL_Rect Level::getBallBounds() {
-    return ball->getBounds();
+std::vector<Ball*> Level::getBalls() {
+    return balls;
 }
 
 SDL_Rect Level::getPaddleBounds() {
@@ -133,4 +173,8 @@ SDL_Rect Level::getPaddleBounds() {
 
 std::vector<Brick> Level::getBricks() {
     return bricks;
+}
+
+std::vector<Particle*> Level::getParticles() {
+    return particles;
 }
